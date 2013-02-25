@@ -6,6 +6,11 @@ uploadcare.whenReady ->
       uploading: 'Uploading... Please wait.'
       errors:
         default: 'Error'
+        baddata: 'Incorrect value'
+        size: 'Too big'
+        upload: 'Can\'t upload' 
+        user: 'Upload canceled'
+        info: 'Can\'t load info' 
         image: 'Only images allowed'
       draghere: 'Drop the file here'
       file:
@@ -25,16 +30,50 @@ uploadcare.whenReady ->
           documents: 'Documents'
         tabs:
           file:
-            title: 'My computer'
-            line1: 'Grab any file off your computer.'
-            line2: 'Browse for it in a dialog or drag and drop.'
-            button: 'Browse files'
+            drag: 'Drop a file here'
+            or: 'or'
+            button: 'Choose a file from your computer'
+            also: 'You can also choose it from'
+            tabNames:
+              facebook: 'Facebook'
+              dropbox: 'Dropbox'
+              gdrive: 'Google Drive'
+              instagram: 'Instagram'
+              url: 'Arbitrary Links'
           url:
             title: 'Files from the Web'
             line1: 'Grab any file off the web.'
             line2: 'Just provide the link.'
             input: 'Paste your link here...'
             button: 'Upload'
+          preview:
+            unknownName: 'unknown'
+            change: 'Change file'
+            back: 'Back'
+            done: 'Select'
+            unknown:
+              title: 'Uploading. Please wait for a preview.'
+              done: 'Skip preview and accept'
+            regular:
+              title: 'Upload this file?'
+              line1: 'You are about to upload the file above.'
+              line2: 'Please confirm.'
+            image:
+              title: 'Upload this image?'
+              change: 'Change image'
+            error:
+              default:
+                title: 'Uploading failed'
+                line1: 'Something went wrong during uploading.'
+                line2: 'Please try again.'
+              image:
+                title: 'Images only'
+                line1: 'Only image files can be accepted.'
+                line2: 'Please try again with another file.'
+              size:
+                title: 'Size limit'
+                line1: 'The file you selected exceed the 100MB limit.'
+                line2: 'Please try again with another file.'
 
 
   # Pluralization rules taken from:

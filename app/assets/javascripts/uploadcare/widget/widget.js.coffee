@@ -6,138 +6,115 @@
 uploadcare.whenReady ->
   {
     namespace,
-    initialize,
     utils,
     uploads,
     files,
     jQuery: $
   } = uploadcare
 
+  {t} = uploadcare.locale
+
   namespace 'uploadcare.widget', (ns) ->
     class ns.Widget
+
       constructor: (element) ->
         @element = $(element)
         @settings = utils.buildSettings @element.data()
-        @uploader = new uploads.Uploader(@settings)
-
-        @currentId = null
-
-        @template = new ns.Template(@settings, @element)
-        $(@template).on(
-          'uploadcare.widget.template.cancel uploadcare.widget.template.remove',
-          @__cancel
-        )
-
-        @element.on('change', @__changed)
 
         @__setupWidget()
+        @currentFile = null
         @template.reset()
-        @available = true
+
+        @__skipChange = 0
+        @element.on 'change.uploadcare', =>
+          if @__skipChange == 0
+            @reloadInfo()
+          else
+            @__skipChange--
 
         @reloadInfo()
+
+      __reset: (keepValue=false) =>
+        @currentFile?.upload?.reject()
+        @currentFile = null
+        @template.reset()
+        unless keepValue
+          @__setValue ''
+
+      __setFile: (newFile, keepValue=false) =>
+        if newFile == @currentFile
+          return
+        @__reset(keepValue)
+        if newFile
+          @currentFile = newFile
+          @template.started()
+          @currentFile.startUpload()
+          @template.listen @currentFile.upload
+          @currentFile.info()
+            .fail (error, file) =>
+              if file == @currentFile
+                @__fail error
+            .done (file) =>
+              if file == @currentFile
+                @template.setFileInfo(file)
+                @template.loaded()
+                unless keepValue
+                  if file.cdnUrlModifiers
+                    @__setValue file.cdnUrl
+                  else
+                    @__setValue file.fileId
+
+      __setValue: (value) ->
+        @__skipChange++
+        @setValue value
 
       setValue: (value) ->
-        @element.val(value)
+        @element.val(value).change()
 
-        @reloadInfo()
+      reloadInfo: =>
+        if @element.val()
+          file = uploadcare.fileFrom @settings, 'uploaded', @element.val()
+          @__setFile file, true
+        else
+          @__reset()
 
-      reloadInfo: ->
-        id = utils.uuidRegex.exec @element.val()
-        id = if id then id[0] else null
-
-        if @currentId != id
-          @currentId = id
-
-          if id
-            info = uploads.fileInfo(id, @settings)
-            @__setLoaded(info)
-          else
-            @__reset()
-
-      __changed: (e) =>
-        @reloadInfo()
-
-      __setLoaded: (infoPr) ->
-        $.when(infoPr)
-          .fail(@__fail)
-          .done (info) =>
-            if @settings.imagesOnly && !uploads.isImage(info)
-              return @__fail('image')
-            @template.setFileInfo(info)
-            @setValue info.fileId
-            @template.loaded()
-
-      __fail: (type) =>
-        @__cancel()
-        @template.error(type)
-        @available = true
-
-      __reset: =>
-        @__resetUpload()
-        @__setupFileButton()
-        @available = true
-        @template.reset()
-        $(this).trigger('uploadcare.widget.cancel')
-
-      __cancel: =>
+      __fail: (error) =>
         @__reset()
-        @setValue ''
+        @template.error error
 
       __setupWidget: ->
-        # Initialize the file browse button
-        @fileButton = @template.addButton('file')
-        @__setupFileButton()
+        @template = new ns.Template(@settings, @element)
 
-        # Create the dialog and its button
+        @template.addButton('cancel', t('buttons.cancel')).on('click', @__reset)
+        @template.addButton('remove', t('buttons.remove')).on('click',  @__reset)
+
+        # Create the dialog and widget buttons
         if @settings.tabs.length > 0
+          if 'file' in @settings.tabs
+            fileButton = @template.addButton('file')
+            fileButton.on 'click', =>
+              @openDialog('file')
+
           dialogButton = @template.addButton('dialog')
           dialogButton.on 'click', => @openDialog()
 
+
         # Enable drag and drop
-        ns.dragdrop.receiveDrop(@upload, @template.dropArea)
-        @template.dropArea.on 'uploadcare.dragstatechange', (e, active) =>
-          unless active && @dialog()?
+        ns.dragdrop.receiveDrop(@__openDialogWithFile, @template.dropArea)
+        @template.dropArea.on 'dragstatechange.uploadcare', (e, active) =>
+          unless active && uploadcare.isDialogOpened()
             @template.dropArea.toggleClass('uploadcare-dragging', active)
 
-      __setupFileButton: ->
-        utils.fileInput @fileButton, false, (e) =>
-          @upload('event', e)
+        @template.content.on 'click', '@uploadcare-widget-file-name', =>
+          @openDialog()
 
-      upload: (args...) =>
-        # Allow two types of calls:
-        #
-        #     widget.upload(ns.files.foo(args...))
-        #     widget.upload('foo', args...)
-        @__resetUpload()
+      __openDialogWithFile: (type, data) =>
+        file = uploadcare.fileFrom @settings, type, data
+        uploadcare.openDialog(@settings, file).done(@__setFile)
 
-        @template.started()
-        @available = false
-
-        currentUpload = @uploader.upload(args...)
-        @template.listen(currentUpload)
-
-        currentUpload
-          .fail(@__fail)
-          .done (infos) => @__setLoaded(infos[0])
-
-      __resetUpload: ->
-        @uploader.reset()
-
-      currentDialog = null
-
-      dialog: -> currentDialog
-
-      openDialog: ->
-        @closeDialog()
-        currentDialog = ns.showDialog(@settings)
-          .done(@upload)
-          .always( -> currentDialog = null)
-
-
-      closeDialog: ->
-        currentDialog?.close()
-
-    initialize
-      name: 'widget'
-      class: ns.Widget
-      elements: '@uploadcare-uploader'
+      openDialog: (tab) ->
+        uploadcare.openDialog(@settings, @currentFile, tab)
+          .done(@__setFile)
+          .fail (file) =>
+            unless file == @currentFile
+              @__setFile null

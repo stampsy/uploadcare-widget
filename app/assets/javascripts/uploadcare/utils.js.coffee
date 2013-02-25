@@ -11,6 +11,16 @@ uploadcare.whenReady ->
     ns.defer = (fn) ->
       setTimeout fn, 0
 
+    ns.bindAll = (source, methods) ->
+      target = {}
+      for method in methods
+        do (method) ->
+          fn = source[method]
+          target[method] = ->
+            result = fn.apply(source, arguments)
+            if result == source then target else result # Fix chaining
+      target
+
     ns.uuid = ->
       'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace /[xy]/g, (c) ->
         r = Math.random() * 16 | 0
@@ -18,6 +28,7 @@ uploadcare.whenReady ->
         v.toString(16)
 
     ns.uuidRegex = /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i
+    ns.cdnUrlModifiersRegex = /(?:-\/(?:[a-z0-9_]+\/)+)+/i
 
     ns.normalizeUrl = (url) ->
       url = "https://#{url}" unless url.match /^([a-z][a-z0-9+\-\.]*:)?\/\//i
@@ -78,3 +89,21 @@ uploadcare.whenReady ->
           overflow: 'hidden'
         )
         .append(input)
+
+    # url = parseUrl('http://example.com/page/123?foo=bar#top')
+    # url.href == 'http://example.com/page/123?foo=bar#top'
+    # url.protocol == 'http:'
+    # url.host == 'example.com'
+    # url.pathname == '/page/123'
+    # url.search == '?foo=bar'
+    # url.hash == '#top'
+    ns.parseUrl = (url) ->
+      a = document.createElement('a')
+      a.href = url
+      return a
+
+    ns.createObjectUrl = (object) ->
+      URL = window.URL || window.webkitURL
+      if URL
+        return URL.createObjectURL(object)
+      return null

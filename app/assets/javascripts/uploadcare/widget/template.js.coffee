@@ -21,11 +21,6 @@ uploadcare.whenReady ->
 
         @statusText = @content.find('@uploadcare-widget-status-text')
         @buttonsContainer = @content.find('@uploadcare-widget-buttons')
-        @cancelButton = @buttonsContainer.find('@uploadcare-widget-buttons-cancel')
-        @removeButton = @buttonsContainer.find('@uploadcare-widget-buttons-remove')
-
-        @cancelButton.on 'click', => $(this).trigger('uploadcare.widget.template.cancel')
-        @removeButton.on 'click', => $(this).trigger('uploadcare.widget.template.remove')
 
         @dropArea = @content.find('@uploadcare-drop-area')
 
@@ -44,16 +39,15 @@ uploadcare.whenReady ->
       removeState: (state) ->
         @content.removeClass("uploadcare-widget-state-#{state}")
 
-      addButton: (name) ->
-        li = $('<li>').addClass("uploadcare-widget-buttons-#{name}")
-        @buttonsContainer.find('@uploadcare-widget-buttons-cancel').before(li)
+      addButton: (name, caption='') ->
+        li = $ tpl('widget-button', {name, caption})
+        @buttonsContainer.append(li)
         return li
 
       setStatus: (status) ->
         @content.attr('data-status', status)
         form = @element.closest('@uploadcare-upload-form')
-        form.trigger("uploadcare.uploader.#{status}")
-        @element.trigger("uploadcare.uploader.#{status}")
+        form.trigger("#{status}.uploadcare")
 
       reset: ->
         @statusText.text(t('ready'))
@@ -76,18 +70,7 @@ uploadcare.whenReady ->
         @statusText.text(t('uploading'))
         @setStatus 'started'
 
-      setFileInfo: (infos...) ->
-        if infos.length > 1
-          caption = t('file', infos.length)
-          size = 0
-          size += info.fileSize for info in infos
-        else
-          caption = utils.fitText(infos[0].fileName, 16)
-          size = infos[0].fileSize
-
-          if infos[0].isStored
-            href = "#{@settings.cdnBase}/#{infos[0].fileId}/#{infos[0].fileName}"
-            caption = "<a href='#{href}' target='_blank'>#{caption}</a>"
-
-        size = Math.ceil(size / 1024).toString()
-        @statusText.html "#{caption}, #{size} kb"
+      setFileInfo: (file) ->
+        name = utils.fitText(file.fileName, 16)
+        size = Math.ceil(file.fileSize / 1024).toString()
+        @statusText.html tpl('widget-file-name', {name, size})

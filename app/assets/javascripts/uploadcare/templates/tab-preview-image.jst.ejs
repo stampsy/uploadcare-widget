@@ -1,0 +1,20 @@
+<div class="uploadcare-dialog-title"><%- t('dialog.tabs.preview.image.title') %></div>
+
+<div class="uploadcare-dialog-preview-image-wrap1">
+<div class="uploadcare-dialog-preview-image-wrap2">
+  <img 
+    src="<%- file.previewUrl %>" 
+    title="<%- file.fileName %>" 
+    alt="<%- file.fileName %>"
+  />
+</div>
+</div>
+
+<div class="uploadcare-dialog-preview-footer">
+  <div 
+    class="uploadcare-dialog-button" 
+    role="uploadcare-dialog-preview-back"><%- t('dialog.tabs.preview.image.change') %></div>
+  <div 
+    class="uploadcare-dialog-button-success" 
+    role="uploadcare-dialog-preview-done"><%- t('dialog.tabs.preview.done') %></div>
+</div>

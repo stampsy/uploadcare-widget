@@ -1,0 +1,453 @@
+$dialog-tab-width: x(3);
+$dialog-tab-height: y(3);
+$dialog-body-height: y(28);
+
+$dialog-width: x(36);
+$dialog-height: $dialog-body-height;
+
+$dialog-corner-radius: 8px;
+$dialog-link-color: #1a85ad;
+$dialog-link-active-color: #252525;
+$dialog-button-text-color: #fff;
+$dialog-body-background-color: #efefef;
+$dialog-body-shadow-color: #dee0e1;
+$dialog-body-field-color: #fff;
+$dialog-body-border-color: #c5cace;
+$dialog-body-text-color: #000;
+$dialog-body-text-color-lighter: #545454;
+$dialog-body-font-size: 16px;
+$dialog-body-font-size-smaller: 13px;
+$dialog-overlay-color: rgba(#a9abac, .8);
+$dialog-close-button-color: #747677;
+
+$dialog-free-space-for-close-button: y(2);
+
+.uploadcare-dialog {
+  font-family: $font-family;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: $dialog-overlay-color;
+  z-index: 10000;
+  overflow: auto;
+  * {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.uploadcare-dialog-inner-wrap1 {
+  display: table;
+  width: 100%;
+  height: 100%;
+}
+.uploadcare-dialog-inner-wrap2 {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.uploadcare-dialog-close {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-width: $dialog-width + $dialog-free-space-for-close-button * 2;
+  > div {
+    $size: y(1.5);
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    width: $size;
+    height: $size;
+    line-height: $size;
+    font-size: $size;
+    font-weight: bold;
+    color: $dialog-close-button-color;
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+}
+
+.uploadcare-dialog-panel-wrap {
+  margin: 0 auto;
+  width: $dialog-width;
+  padding: 0 $dialog-free-space-for-close-button;
+}
+
+.uploadcare-dialog-panel {
+  width: $dialog-width;
+  height: $dialog-height;
+  overflow: hidden;
+  border-radius: $dialog-corner-radius;
+  background: #fff;
+  @include prefix(box-shadow, 0 1px 2px rgba(black, 0.35));
+  font-weight: normal;
+
+  a {
+    text-decoration: none;
+    border-bottom: 1px dotted;
+    &:link, &:visited {
+      color: $dialog-link-color;
+      border-bottom-color: $dialog-link-color;
+    }
+    &:hover, &:active {
+      color: $dialog-link-active-color;
+      border-bottom-color: $dialog-link-active-color;
+    }
+  }
+}
+
+.uploadcare-dialog-body {
+  .uploadcare-dialog-tabs {
+    @include prefix(box-sizing, border-box);
+    width: $dialog-tab-width;
+    height: $dialog-body-height;
+    float: left;
+    list-style: none;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    background: $dialog-body-shadow-color;
+    border-top: 1px solid $dialog-body-border-color;
+    border-bottom-left-radius: $dialog-corner-radius;
+    border-top-left-radius: $dialog-corner-radius;
+    overflow: hidden;
+    position: relative;
+    &:before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 0;
+      border-left: 1px solid $dialog-body-border-color;
+    }
+
+    .uploadcare-dialog-tab {
+      @include prefix(box-sizing, border-box);
+      width: $dialog-tab-width;
+      height: $dialog-tab-height;
+      border-bottom: 1px solid $dialog-body-border-color;
+      border-right: 1px solid $dialog-body-border-color;
+      cursor: pointer;
+
+      $frame-size: 50px;
+      position: relative;
+      &:after {
+        @extend %tab-icons-image;
+        content: '';
+        display: block;
+        position: absolute;
+        width: $frame-size;
+        height: $frame-size;
+        top: 50%; 
+        left: 50%;
+        margin-top: $frame-size / -2;
+        margin-left: $frame-size / -2;
+      }
+
+      &:hover {
+        background-color: #ebeced;
+        &:after {
+          @extend %tab-icons-hover-image;
+        }
+      }
+
+      &.uploadcare-dialog-selected-tab {
+        margin-right: -1px;
+        border-right: 1px solid $dialog-body-background-color;
+        &, &:hover {
+          background-color: $dialog-body-background-color;
+        }
+        &:after {
+          @extend %tab-icons-active-image;
+        }
+      }
+
+      &.uploadcare-dialog-tab-file:after {
+        background-position: 0 ($frame-size * -1);
+      }
+      &.uploadcare-dialog-tab-url:after {
+        background-position: 0 ($frame-size * -2);
+      }
+      &.uploadcare-dialog-tab-facebook:after {
+        background-position: 0 ($frame-size * -3);
+      }
+      &.uploadcare-dialog-tab-dropbox:after {
+        background-position: 0 ($frame-size * -4);
+      }
+      &.uploadcare-dialog-tab-gdrive:after {
+        background-position: 0 ($frame-size * -5);
+      }
+      &.uploadcare-dialog-tab-instagram:after {
+        background-position: 0 ($frame-size * -6);
+      }
+
+      &.uploadcare-dialog-first-tab {
+        border-top-left-radius: $dialog-corner-radius;
+      }
+    }
+  }
+
+  .uploadcare-dialog-tabs-panel {
+    position: relative;
+    @include prefix(box-sizing, border-box);
+    margin-left: $dialog-tab-width;
+    padding: y(1) x(1);
+    width: $dialog-width - $dialog-tab-width;
+    height: $dialog-body-height;
+    line-height: y(1);
+    background: $dialog-body-background-color;
+    border-top: 1px solid $dialog-body-border-color;
+    border-bottom-right-radius: $dialog-corner-radius;
+    border-top-right-radius: $dialog-corner-radius;
+    font-size: $dialog-body-font-size;
+    color: $dialog-body-text-color;
+
+    input {
+      @include prefix(box-sizing, border-box);
+      width: 100%;
+      height: y(2);
+      margin-bottom: y(1);
+      padding: y(0.5) x(0.5);
+      font-family: inherit;
+      font-size: $dialog-body-font-size;
+      border: 1px solid $dialog-body-border-color;
+      background: $dialog-body-field-color;
+      color: $dialog-body-text-color;
+    }
+
+    .uploadcare-dialog-drop-file {
+      background: $dialog-body-field-color;
+      border: 1px dashed $dialog-body-border-color;
+      border-radius: 3px;
+      height: y(4.5);
+      padding-top: y(3.5);
+      text-align: center;
+      color: $dialog-body-text-color-lighter;
+    }
+  }
+
+  .uploadcare-dialog-tabs-panel-facebook,
+  .uploadcare-dialog-tabs-panel-dropbox,
+  .uploadcare-dialog-tabs-panel-gdrive,
+  .uploadcare-dialog-tabs-panel-instagram {
+    padding: 0;
+    iframe {
+      border-bottom-right-radius: $dialog-corner-radius;
+      border-top-right-radius: $dialog-corner-radius;
+    }
+  }
+}
+
+.uploadcare-dialog-footer {
+  font-size: $dialog-body-font-size-smaller;
+  text-align: center;
+  color: #7c7c7c;
+  margin-top: x(.6);
+  a {
+    color: black;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+
+// § Common tab elements
+
+.uploadcare-dialog-title {
+  font-size: 25px;
+  line-height: 1;
+  font-weight: bolder;
+  margin-bottom: x(1);
+}
+
+.uploadcare-dialog-title2 {
+  font-size: 20px;
+  line-height: 1;
+  padding-bottom: y(.5);
+}
+
+.uploadcare-dialog-label {
+  font-size: 15px;
+  line-height: x(1);
+  font-weight: bolder;
+  margin-bottom: x(.5);
+}
+
+.uploadcare-dialog-section {
+  margin-bottom: y(1);
+}
+
+.uploadcare-dialog-normal-text {
+  font-size: $dialog-body-font-size-smaller;
+  color: $dialog-body-text-color-lighter;
+}
+
+$dialog-button-height: 33px;
+.uploadcare-dialog-button, 
+.uploadcare-dialog-button-success {
+  $color-a: #f5f5f5;
+  $color-b: #f1f1f1;
+
+  display: inline-block;
+  font-size: $dialog-body-font-size-smaller;
+  line-height: $dialog-button-height - 2;
+  padding: 0 y(1);
+  margin-right: .5em;
+  border: solid 1px #dcdcdc;
+  border-radius: 2px;
+  color: #444444;
+  cursor: pointer;
+  @include gradient($color-a, $color-b);
+
+  &:active {
+    @include gradient($color-b, $color-a);
+  }
+
+  &[disabled] {
+    cursor: text;
+    opacity: .7;
+  }
+}
+
+.uploadcare-dialog-button-success {
+  $color-a: #4892f6;
+  $color-b: #4289e6;
+
+  color: white;
+  border-color: #2a7ce5;
+
+  @include gradient($color-a, $color-b);
+  
+  &:active {
+    @include gradient($color-b, $color-a);
+  }
+}
+
+.uploadcare-dialog-big-button {
+  border-radius: 100px;
+  font-size: 20px;
+  color: white;
+  line-height: y(3);
+  border: solid 1px #276fcb;
+  text-shadow: 0 -1px #2a7ce5;
+  display: inline-block;
+  padding: 0 2em;
+  @include prefix(box-shadow, inset 0 -3px #266fcb);
+  @include gradient(#4892f6, #4289e6);
+}
+
+
+// § Preview tab
+
+$dialog-preview-container-height: 452px;
+.uploadcare-dialog-preview-image-wrap1 {
+  width: 100%;
+  height: $dialog-preview-container-height;
+  margin-bottom: x(1);
+  display: table;
+}
+.uploadcare-dialog-preview-image-wrap2 {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  img {
+    max-width: 100%;
+    max-height: $dialog-preview-container-height;
+    display: block;
+    margin: 0 auto;
+  }
+}
+
+.uploadcare-dialog-preview-footer {
+  background: #fff3be;
+  border-top: 1px solid #efe2a9;
+  height: $dialog-button-height;
+  padding: 16px 30px;
+  margin: 0 x(-1) y(-1);
+  border-bottom-right-radius: $dialog-corner-radius;
+  .uploadcare-dialog-button-success {
+    float: right;
+    margin-right: 0;
+  }
+  .uploadcare-dialog-button {
+    float: left;
+  }
+}
+
+.uploadcare-dialog-preview-center {
+  text-align: center;
+  padding-top: y(8);
+}
+
+.uploadcare-dialog-preview-circle {
+  width: y(3);
+  height: y(3);
+  display: inline-block;
+  margin-bottom: y(1);
+}
+
+
+// § Computer tab
+
+.uploadcare-dialog-file-drop-area {
+  width: 100%;
+  height: 100%;
+  @include prefix(box-sizing, border-box);
+  background: #f8f8f8;
+  border: dashed 3px #c5cacd;
+  text-align: center;
+  border-radius: 3px;
+  padding-top: y(3.5);
+  .uploadcare-dialog-big-button {
+    margin-bottom: y(2);
+  }
+}
+  .uploadcare-dialog-file-title {
+    font-size: 40px;
+    line-height: 1;
+    color: #dee0e1;
+    font-weight: bold;
+    margin-bottom: y(2);
+    text-shadow: 0 1px white;
+  }
+  .uploadcare-dialog-file-or {
+    font-size: $dialog-body-font-size-smaller;
+    color: #8f9498;
+    margin-bottom: y(2);
+  }
+  .uploadcare-dialog-file-sources {
+    position: relative;
+    display: inline-block;
+    &:before {
+      @extend %arrow-image;
+      content: '';
+      display: block;
+      position: absolute;
+      width: 43px;
+      height: 27px;
+      top: -12px;
+      left: -65px;
+    }
+  }
+    .uploadcare-dialog-file-source {
+      display: inline;
+      font-size: 15px;
+      margin-right: .2em;
+      cursor: pointer;
+      &:after {
+        content: '\00B7';
+        color: #b7babc;
+        margin-left: .5em;
+      }
+      &:last-child:after {
+        display: none;
+      }
+    }

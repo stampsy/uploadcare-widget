@@ -1,50 +1,66 @@
 uploadcare.whenReady ->
-  {namespace, jQuery: $, utils} = uploadcare
+  {
+    namespace,
+    jQuery: $,
+    utils,
+    debug
+  } = uploadcare
 
   namespace 'uploadcare.files', (ns) ->
-    class ns.EventFile
-      constructor: (@file) ->
 
-      upload: (settings) ->
-        settings = utils.buildSettings settings
-        targetUrl = "#{settings.urlBase}/iframe/"
+    class ns.EventFile extends ns.BaseFile
+      constructor: (settings, @__file) ->
+        super
 
         @fileId = utils.uuid()
-        @fileSize = @file.size
-        @fileName = @file.name
+        @fileSize = @__file.size
+        @fileName = @__file.name
+        @previewUrl = utils.createObjectUrl @__file
+
+      __startUpload: ->
+        targetUrl = "#{@settings.urlBase}/iframe/"
 
         if @fileSize > (100*1024*1024)
-          @__fail()
+          @__uploadDf.reject('size', this)
           return
 
         formData = new FormData()
-        formData.append('UPLOADCARE_PUB_KEY', settings.publicKey)
+        formData.append('UPLOADCARE_PUB_KEY', @settings.publicKey)
         formData.append('UPLOADCARE_FILE_ID', @fileId)
+        formData.append('file', @__file)
 
-        formData.append('file', @file)
+        fail = =>
+          @__uploadDf.reject('upload', this)
 
         # Naked XHR for progress tracking
-        @xhr = new XMLHttpRequest()
-        @xhr.open 'POST', targetUrl
-        @xhr.withCredentials = true
-        @xhr.setRequestHeader('X-PINGOTHER', 'pingpong')
-        @xhr.addEventListener 'error timeout abort', @__onError
-        @xhr.addEventListener 'load', @__onLoad
-        @xhr.addEventListener 'loadend', => @__fail() unless @xhr.status
-        @xhr.upload.addEventListener 'progress', @__onProgress
-        @xhr.send formData
+        xhr = new XMLHttpRequest()
+        xhr.addEventListener 'loadend', =>
+          fail() if xhr? && !xhr.status
+        xhr.upload.addEventListener 'progress', =>
+          @__loaded = event.loaded
+          @fileSize = event.totalSize || event.total
+          @__uploadDf.notify(@fileSize / @__loaded, this)
 
-      cancel: -> @__cleanUp()
+        # jQuery Ajax wrapper for JSON and stuff
+        $.ajax
+          xhr: -> xhr # Provide our XHR to jQuery
+          crossDomain: true
+          type: 'POST'
+          url: "#{@settings.urlBase}/iframe/?jsonerrors=1"
+          xhrFields: {withCredentials: true}
+          headers: {'X-PINGOTHER': 'pingpong'}
+          contentType: false # For correct boundary string
+          processData: false
+          data: formData
+          dataType: 'json'
+          error: fail
+          success: (data) =>
+            if data?.error
+              debug(data.error.content)
+              return fail()
+            @__uploadDf.resolve(this)
 
-      __cleanUp: ->
-        @xhr?.abort()
-        @xhr = null
-
-      __fail: -> @__onError()
-
-      __onError: => $(this).trigger('uploadcare.api.uploader.error')
-      __onLoad: => $(this).trigger('uploadcare.api.uploader.load')
-      __onProgress: (event) =>
-        @loaded = event.loaded
-        @fileSize = event.totalSize || event.total
-        $(this).trigger('uploadcare.api.uploader.progress')
+        @__uploadDf.always =>
+          _xhr = xhr
+          xhr = null
+          _xhr.abort() # Correct order to avoid errors
