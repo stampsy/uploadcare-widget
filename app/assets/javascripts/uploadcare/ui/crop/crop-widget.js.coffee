@@ -79,6 +79,10 @@ uploadcare.whenReady ->
       #     .fail (error) ->
       #       # ...
       croppedImageUrl: (originalUrl) ->
+        @croppedImageModifiers(originalUrl)
+          .pipe (modifiers) => @__url + modifiers
+
+      croppedImageModifiers: (originalUrl) ->
         @__clearImage()
         @__setImage originalUrl
         @__deferred.promise()
@@ -86,7 +90,7 @@ uploadcare.whenReady ->
       # This method could be usefull if you want to make your own done button.
       forceDone: ->
         if @__state is 'loaded'
-          @__deferred.resolve @__buildUrl @getCurrentCoords()
+          @__deferred.resolve @__buildModifiers @getCurrentCoords()
         else
           throw new Error("not ready")
 
@@ -104,10 +108,10 @@ uploadcare.whenReady ->
         @__widgetElement.remove()
         @__widgetElement = @__imageWrap = @__doneButton = null
 
-      __buildUrl: (coords) ->
+      __buildModifiers: (coords) ->
         size = "#{coords.w}x#{coords.h}"
         topLeft = "#{coords.x},#{coords.y}"
-        url = "#{@__url}-/crop/#{size}/#{topLeft}/"
+        url = "-/crop/#{size}/#{topLeft}/"
         if @__options.scale
           pWidth = @__options.preferedSize.split('x')[0]
           if coords.w > pWidth or @__options.upscale
