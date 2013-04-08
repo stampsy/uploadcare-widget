@@ -20,10 +20,6 @@ namespace 'uploadcare.files', (ns) ->
     __startUpload: ->
       targetUrl = "#{@settings.urlBase}/iframe/"
 
-      if @fileSize > (100*1024*1024)
-        @__uploadDf.reject('size', this)
-        return
-
       formData = new FormData()
       formData.append('UPLOADCARE_PUB_KEY', @settings.publicKey)
       formData.append('UPLOADCARE_FILE_ID', @fileId)
