@@ -80,6 +80,7 @@ namespace 'uploadcare.files', (ns) ->
       originalUrl: "#{@settings.cdnBase}/#{@fileId}/"
       cdnUrl: "#{@settings.cdnBase}/#{@fileId}/#{@cdnUrlModifiers or ''}"
       cdnUrlModifiers: @cdnUrlModifiers
+      # Will be removed in 1.0.
       previewUrl: "#{@settings.cdnBase}/#{@fileId}/"  # deprecated, use originalUrl
       preview: @apiPromise.preview
 
