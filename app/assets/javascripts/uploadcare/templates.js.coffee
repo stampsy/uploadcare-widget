@@ -1,4 +1,4 @@
-# = require_directory ./templates
+# ≠ require_directory ./templates
 
 {
   namespace,

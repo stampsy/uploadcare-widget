@@ -1,10 +1,10 @@
 # = require ../files
-# = require ./dragdrop
-# = require ./template
-# = require ./dialog
+# ≠ require ./dragdrop
+# ≠ require ./template
+# ≠ require ./dialog
 # = require_self
-# = require ./widget
-# = require ./multiple-widget
+# ≠ require ./widget
+# ≠ require ./multiple-widget
 
 {
   namespace,

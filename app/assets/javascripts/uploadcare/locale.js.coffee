@@ -1,4 +1,5 @@
-# = require_directory ./locale
+# ≠ require_directory ./locale
+# = require ./locale/en.js
 
 {
   namespace,

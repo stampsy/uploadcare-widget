@@ -22,7 +22,11 @@ has more information on using the widget itself.
 You need a working Ruby 1.9.3 environment
 with [Bundler](http://gembundler.com/).
 
-* `bundle install` to get build dependencies.
+* `xcode-select --install` to install command line tools in OS X
+* `sudo gem install bundler` to install bundler
+* `sudo gem install rake` to install rake if missing
+
+* `sudo bundle install` to get build dependencies.
 * `bundle exec rake js:latest:build` to build assets
   to the **pkg/latest** directory (with the “latest” suffix).
 * `bundle exec rake js:release:build` to build assets

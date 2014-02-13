@@ -1,5 +1,5 @@
 # = require uploadcare/utils/abilities
-# = require uploadcare/utils/pusher
+# ≠ require uploadcare/utils/pusher
 # = require uploadcare/utils/collection
 # = require uploadcare/utils/warnings
 
